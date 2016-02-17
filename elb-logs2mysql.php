@@ -435,10 +435,6 @@ class DB
 
 	public function safeValue($value, $always_quote = false)
 	{
-		if (get_magic_quotes_gpc()) {
-			die("magic_quotes_gpc is enabled. Please disable it.\n");
-		}
-		
 		if(!$always_quote) {
 			if (is_null($value)) {
 				return 'NULL';
