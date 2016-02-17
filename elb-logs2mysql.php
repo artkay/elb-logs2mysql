@@ -21,7 +21,7 @@ $app = new App;
 $app->fire();
 
 
-class App 
+class App
 {
 	private $options;
 
@@ -31,12 +31,12 @@ class App
 
 	private $version;
 
-	public function __construct() 
+	public function __construct()
 	{
 		$this->version = VERSION;
 		print("{$_SERVER['SCRIPT_NAME']} v{$this->version}: Imports an AWS ELB logs into a MySQL database.\n");
 
-		$this->options = getopt('',['dir:', 'host:', 'user:', 'password:', 'db:', 'table:', 'create', 'drop', 'timezone']);
+		$this->options = getopt('', ['dir:', 'host:', 'user:', 'password:', 'db:', 'table:', 'create', 'drop', 'timezone']);
 
 		// directory where to look for the log files
 		$this->log_dir = $this->parseOption('dir');
@@ -65,12 +65,12 @@ class App
 		}
 
 		if (!$this->db->tableExists()) {
-			if($create_table) {
+			if ($create_table) {
 				$this->db->createTable();
 			} else {
 				die ("Database table {$this->db->table_quoted} does not exist. Please rerun the script with the --create option to create it.\n");
 			}
-		}		
+		}
 	}
 
 	public function fire()
@@ -79,25 +79,25 @@ class App
 		$status->printStatus();
 
 		//loop through the log files, load them as CSV and insert into the DB
-		foreach($this->log_files as $log_file) {
+		foreach ($this->log_files as $log_file) {
 
-			$status->currentFile ++;
+			$status->currentFile++;
 
-			if(substr($log_file, -4) !== '.log') {
+			if (substr($log_file, -4) !== '.log') {
 				continue;
 			}
 
 			$log_file = new LogFile("{$this->log_dir}/{$log_file}");
 
-			foreach($log_file->records as $record) {
+			foreach ($log_file->records as $record) {
 				$record->user_agent = $this->db->escapeString($record->user_agent);
 				$query = $record->getSQLInsertSyntax($this->db->table_safe);
 				$this->db->query($query);
-				
-				$status->currentRecord ++;
+
+				$status->currentRecord++;
 				$status->printStatus();
 			}
-				
+
 		}
 
 		print("\ndone\n");
@@ -123,7 +123,7 @@ class App
 			return $this->options[$option];
 		} elseif (array_key_exists($option, $this->options) && $existence == true) {
 			return true;
-		} elseif ($default !== null) { 
+		} elseif ($default !== null) {
 			return $default;
 		} else {
 			$this->displayUsage();
@@ -141,10 +141,9 @@ class LogRecordModel
 			'time' => [
 				'sql_type' => 'TIMESTAMP',
 				'csv_field' => 'time',
-				'csv_value' => function ($value)
-				{
+				'csv_value' => function ($value) {
 					$result = date("Y-m-d H:i:s", strtotime($value));
-
+					
 					return $result;
 				},
 			],
@@ -154,7 +153,7 @@ class LogRecordModel
 			'request_ip' => [
 				'sql_type' => 'VARCHAR(15)',
 				'csv_field' => 'request_ip_port',
-				'csv_value' => function($value) {
+				'csv_value' => function ($value) {
 					$array = explode(':', $value);
 					$result = $array[0];
 
@@ -164,9 +163,9 @@ class LogRecordModel
 			'request_port' => [
 				'sql_type' => 'VARCHAR(6)',
 				'csv_field' => 'request_ip_port',
-				'csv_value' => function($value) {
+				'csv_value' => function ($value) {
 					$array = explode(':', $value);
-					if(!array_key_exists(1, $array)) {
+					if (!array_key_exists(1, $array)) {
 						$result = '-';
 					} else {
 						$result = $array[1];
@@ -178,7 +177,7 @@ class LogRecordModel
 			'backend_ip' => [
 				'sql_type' => 'VARCHAR(15)',
 				'csv_field' => 'backend_ip_port',
-				'csv_value' => function($value) {
+				'csv_value' => function ($value) {
 					$array = explode(':', $value);
 					$result = $array[0];
 
@@ -188,9 +187,9 @@ class LogRecordModel
 			'backend_port' => [
 				'sql_type' => 'VARCHAR(6)',
 				'csv_field' => 'backend_ip_port',
-				'csv_value' => function($value) {
+				'csv_value' => function ($value) {
 					$array = explode(':', $value);
-					if(!array_key_exists(1, $array)) {
+					if (!array_key_exists(1, $array)) {
 						$result = '-';
 					} else {
 						$result = $array[1];
@@ -223,20 +222,20 @@ class LogRecordModel
 			'request_method' => [
 				'sql_type' => 'VARCHAR(10)',
 				'csv_field' => 'method_url',
-				'csv_value' => function($value) {
+				'csv_value' => function ($value) {
 					$array = explode(' ', $value);
 					$result = $array[0];
-					
+
 					return $result;
 				},
 			],
 			'request_url' => [
 				'sql_type' => 'VARCHAR(1024)',
 				'csv_field' => 'method_url',
-				'csv_value' => function($value) {
+				'csv_value' => function ($value) {
 					$array = explode(' ', $value);
 					$result = $array[1];
-					
+
 					return $result;
 				},
 			],
@@ -252,11 +251,11 @@ class LogRecordModel
 		];
 	}
 
-	public function getSQLCreateSyntax($table) 
+	public function getSQLCreateSyntax($table)
 	{
 		$query = "CREATE TABLE {$table} (";
 
-		foreach($this->properties as $column => $settings) {
+		foreach ($this->properties as $column => $settings) {
 			$query .= "`{$column}` {$settings['sql_type']},\n";
 		}
 
@@ -266,11 +265,11 @@ class LogRecordModel
 	}
 }
 
-class LogRecord 
+class LogRecord
 {
 	protected $model = null;
 
-	public function __construct() 
+	public function __construct()
 	{
 		$this->model = new LogRecordModel;
 
@@ -280,10 +279,10 @@ class LogRecord
 	}
 
 
-	public function fillFromCSVArray($array) 
+	public function fillFromCSVArray($array)
 	{
-		foreach($this->model->properties as $property => $settings) {
-			if(array_key_exists('csv_field', $settings)) {
+		foreach ($this->model->properties as $property => $settings) {
+			if (array_key_exists('csv_field', $settings)) {
 				$csv_key = $settings['csv_field'];
 				$function = $settings['csv_value'];
 				$value = $array[$csv_key];
@@ -297,11 +296,11 @@ class LogRecord
 	public function getSQLInsertSyntax($table)
 	{
 		$values = [];
-		foreach($this->model->properties as $property => $settings) {
+		foreach ($this->model->properties as $property => $settings) {
 			$type = explode('(', $settings['sql_type']);
 			$type = strtolower($type[0]);
 
-			if($type == 'varchar' || $type == 'timestamp') {
+			if ($type == 'varchar' || $type == 'timestamp') {
 				$values[] = "'{$this->{$property}}'";
 			} else {
 				$values[] = $this->{$property};
@@ -317,7 +316,7 @@ class LogRecord
 
 class LogFile
 {
-	protected $csvHeader = ['time', 'elb_name', 'request_ip_port', 'backend_ip_port', 'request_processing_time', 'backend_processing_time', 'client_response_time', 'elb_response_code', 'backend_response_code', 'bytes_received', 'bytes_sent',  'method_url', 'user_agent', 'cipher', 'protocol'];
+	protected $csvHeader = ['time', 'elb_name', 'request_ip_port', 'backend_ip_port', 'request_processing_time', 'backend_processing_time', 'client_response_time', 'elb_response_code', 'backend_response_code', 'bytes_received', 'bytes_sent', 'method_url', 'user_agent', 'cipher', 'protocol'];
 	public $records = [];
 
 	public function __construct($filename)
@@ -357,14 +356,14 @@ class Status
 		$this->printStatus();
 	}
 
-	private function refreshStatus() 
+	private function refreshStatus()
 	{
 		$this->status = "file {$this->currentFile} of {$this->totalFiles}, {$this->currentRecord} records imported";
 	}
 
-	public function printStatus() 
+	public function printStatus()
 	{
-		$eraser = str_repeat(chr(0x08),strlen($this->status));
+		$eraser = str_repeat(chr(0x08), strlen($this->status));
 		$this->refreshStatus();
 		print($eraser . $this->status);
 	}
@@ -390,14 +389,14 @@ class DB
 		$this->table = $table;
 		$this->table_quoted = $this->safeValue($table, true);
 		$this->table_safe = $this->safeIdentifier($table);
-	} 
+	}
 
 	public function query($query)
 	{
 		$result = $this->connection->query($query);
 
-		if(!$result) {
-			die('Database error ('. $this->connection->errno . ') ' . $this->connection->error);
+		if (!$result) {
+			die('Database error (' . $this->connection->errno . ') ' . $this->connection->error);
 		}
 
 		return $result;
@@ -420,7 +419,7 @@ class DB
 		$this->query($query);
 	}
 
-	public function tableExists() 
+	public function tableExists()
 	{
 		$result = $this->query("SHOW TABLES LIKE {$this->table_quoted}");
 
@@ -434,7 +433,7 @@ class DB
 
 	public function safeValue($value, $always_quote = false)
 	{
-		if(!$always_quote) {
+		if (!$always_quote) {
 			if (is_null($value)) {
 				return 'NULL';
 			} elseif (is_bool($value)) {
@@ -442,7 +441,7 @@ class DB
 			} elseif (is_numeric($value)) {
 				return $value;
 			}
-		}		
+		}
 
 		return "'" . $this->connection->escape_string($value) . "'";
 	}
