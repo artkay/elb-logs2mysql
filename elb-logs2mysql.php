@@ -9,10 +9,9 @@
  *
  * Based in part on http://www.startupcto.com/server-tech/apache/importing-apache-httpd-logs-into-mysql
  *
- * @author Art Kay (art -at- artkay.nyc)
- * @requires PHP 5.X
- * @requires MySQL 5.X
  *
+ * (c) 2016 Art Kay (art -at- artkay.nyc)
+ * Latest version at https://github.com/artkay/elb-logs2mysql
  */
 
 define('VERSION', '0.1');
