@@ -91,6 +91,7 @@ class App
 
 			foreach ($log_file->records as $record) {
 				$record->user_agent = $this->db->escapeString($record->user_agent);
+				$record->request_url = $this->db->escapeString($record->request_url);
 				$query = $record->getSQLInsertSyntax($this->db->table_safe);
 				$this->db->query($query);
 
@@ -143,7 +144,7 @@ class LogRecordModel
 				'csv_field' => 'time',
 				'csv_value' => function ($value) {
 					$result = date("Y-m-d H:i:s", strtotime($value));
-					
+
 					return $result;
 				},
 			],
@@ -396,7 +397,7 @@ class DB
 		$result = $this->connection->query($query);
 
 		if (!$result) {
-			die('Database error (' . $this->connection->errno . ') ' . $this->connection->error);
+			die('Database error (' . $this->connection->errno . ') ' . $this->connection->error /* debug . "\n\n" . $query */);
 		}
 
 		return $result;
