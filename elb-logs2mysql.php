@@ -415,7 +415,7 @@ class DB
 
 	public function dropTable()
 	{
-		$sql = "DROP TABLE IF EXISTS {$this->table_safe}";
+		$query = "DROP TABLE IF EXISTS {$this->table_safe}";
 
 		$this->query($query);
 	}
